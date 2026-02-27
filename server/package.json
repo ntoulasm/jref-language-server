@@ -1,8 +1,7 @@
 {
-    "name": "server",
-    "scripts": {
-        "lint": "eslint src"
-    },
-    "devDependencies": {
-    }
+  "name": "server",
+  "scripts": {
+    "lint": "eslint src"
+  },
+  "devDependencies": {}
 }

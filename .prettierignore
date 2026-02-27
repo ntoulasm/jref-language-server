@@ -1,0 +1,11 @@
+# Build directories
+out/
+
+# Dependencies
+node_modules/
+
+# VS Code
+.vscode/
+
+# Package manager files
+package-lock.json
