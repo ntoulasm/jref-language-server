@@ -20,15 +20,16 @@
     ]
   },
   "workspaces": [
-    "client"
+    "client",
+    "server"
   ],
   "scripts": {
     "vscode:prepublish": "npm run compile",
     "compile": "tsc -b ./",
     "watch": "tsc -watch -b ./",
     "pretest": "npm run compile && npm run lint",
-    "lint": "npm run lint -w client",
-    "test": "npm test -w client"
+    "lint": "npm run lint --workspaces",
+    "test": "npm test --workspaces --if-present"
   },
   "devDependencies": {
     "@types/node": "22.x",
