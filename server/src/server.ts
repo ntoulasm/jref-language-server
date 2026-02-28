@@ -8,9 +8,13 @@ import {
   TextDocumentPositionParams,
   TextDocumentSyncKind,
   InitializeResult,
+  TextDocumentChangeEvent,
 } from 'vscode-languageserver/node';
 
 import { TextDocument } from 'vscode-languageserver-textdocument';
+
+import { Node, ParseError, parseTree } from 'jsonc-parser';
+import { createParseErrorDiagnostic } from './diagnostics';
 
 // Create a connection for the server, using Node's IPC as a transport.
 // Also include all preview / proposed LSP features.
@@ -92,15 +96,40 @@ connection.onDidChangeConfiguration((change) => {
   }
 });
 
+function getDocumentSettings(resource: string): Thenable<ExampleSettings> {
+  if (!hasConfigurationCapability) {
+    return Promise.resolve(globalSettings);
+  }
+  let result = documentSettings.get(resource);
+  if (!result) {
+    result = connection.workspace.getConfiguration({
+      scopeUri: resource,
+      section: 'languageServerExample',
+    });
+    documentSettings.set(resource, result);
+  }
+  return result;
+}
+
+// Only keep settings for open documents
 documents.onDidClose((e) => {
   documentSettings.delete(e.document.uri);
 });
 
 // The content of a text document has changed. This event is emitted
 // when the text document first opened or when its content has changed.
-documents.onDidChangeContent((change) => {
-  connection.console.log(change.document.getText());
+documents.onDidChangeContent((change: TextDocumentChangeEvent<TextDocument>) => {
+  const errors: ParseError[] = [];
+  const ast: Node | undefined = parseTree(change.document.getText(), errors);
+  sendDiagnostics(change.document, errors);
 });
+
+function sendDiagnostics(document: TextDocument, parseErrors: ParseError[]) {
+  connection.sendDiagnostics({
+    uri: document.uri,
+    diagnostics: parseErrors.map((parseError) => createParseErrorDiagnostic(document, parseError)),
+  });
+}
 
 connection.onDidChangeWatchedFiles((_change) => {
   // Monitored files have change in VS Code
