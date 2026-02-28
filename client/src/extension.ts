@@ -48,8 +48,6 @@ export async function activate(context: ExtensionContext) {
 
   // Start the client. This will also launch the server
   await client.start();
-
-  console.log('####client started');
 }
 
 export async function deactivate() {
