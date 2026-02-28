@@ -16,6 +16,26 @@
 				"${workspaceFolder}/*/out/*.js",
 			],
 			"preLaunchTask": "${defaultBuildTask}"
+		},
+		{
+			"name": "Attach to Server",
+			"type": "node",
+			"request": "attach",
+			"port": 6009,
+			"address": "localhost",
+			"restart": true,
+			"outFiles": [
+				"${workspaceFolder}/server/out/*.js"
+			]
+		}
+	],
+	"compounds": [
+		{
+			"name": "Client + Server",
+			"configurations": [
+				"Run Extension",
+				"Attach to Server"
+			]
 		}
 	]
 }
