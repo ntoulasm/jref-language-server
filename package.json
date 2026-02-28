@@ -12,10 +12,14 @@
   "activationEvents": [],
   "main": "./client/out/extension.js",
   "contributes": {
-    "commands": [
+    "commands": [],
+    "languages": [
       {
-        "command": "jref-language-server.helloWorld",
-        "title": "Hello World"
+        "id": "jref",
+        "extensions": [
+          ".jref"
+        ],
+        "configuration": "./language-configuration.json"
       }
     ]
   },
@@ -26,7 +30,7 @@
   "scripts": {
     "vscode:prepublish": "npm run compile",
     "compile": "tsc -b ./",
-    "watch": "tsc -watch -b ./",
+    "watch": "tsc -b ./ -watch",
     "pretest": "npm run compile && npm run lint",
     "lint": "npm run lint --workspaces",
     "format": "prettier --write .",
