@@ -2,9 +2,11 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    branches:
+      - main
   pull_request:
-    branches: [main]
+    branches:
+      - main
 
 jobs:
   lint:
@@ -49,4 +51,4 @@ jobs:
         run: npm run compile
 
       - name: Run Tests
-        run: npm run test --workspaces --if-present
+        run: xvfb-run -a npm run test --workspaces --if-present
