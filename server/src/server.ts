@@ -27,6 +27,8 @@ let hasConfigurationCapability: boolean = false;
 let hasWorkspaceFolderCapability: boolean = false;
 let hasDiagnosticRelatedInformationCapability: boolean = false;
 
+const documentRefs: WeakMap<TextDocument, Array<Node>> = new WeakMap();
+
 connection.onInitialize((params: InitializeParams) => {
   let capabilities = params.capabilities;
 
@@ -121,7 +123,9 @@ documents.onDidClose((e) => {
 documents.onDidChangeContent((change: TextDocumentChangeEvent<TextDocument>) => {
   const errors: ParseError[] = [];
   const ast: Node | undefined = parseTree(change.document.getText(), errors);
-  visit(ast);
+  const references: Array<Node> = [];
+  visit(ast, references);
+  documentRefs.set(change.document, references);
   sendDiagnostics(change.document, errors);
 });
 
@@ -129,17 +133,17 @@ function isCompositeNode(node: Node): boolean {
   return node.type === 'object' || node.type === 'array';
 }
 
-function visitCompositeNode(node: Node) {
+function visitCompositeNode(node: Node, acc: Array<Node>) {
   const children = node?.children || [];
   for (const child of children) {
-    visit(child);
+    visit(child, acc);
   }
 }
 
-const visitFunctions: Record<string, (node: Node) => void> = {
+const visitFunctions: Record<string, (node: Node, acc: Array<Node>) => void> = {
   object: visitCompositeNode,
   array: visitCompositeNode,
-  property: (node: Node) => {
+  property: (node: Node, acc: Array<Node>) => {
     const children = node?.children || [];
     if (children.length !== 2) {
       /* incomplete property */
@@ -149,23 +153,22 @@ const visitFunctions: Record<string, (node: Node) => void> = {
     const value = children[1];
     const isReference = key.type === 'string' && key.value === '$ref' && value.type === 'string';
     if (isReference) {
-      const ref = value.value;
-      console.log('Reference found: ' + ref);
+      acc.push(node);
     }
 
     if (isCompositeNode(value)) {
-      visit(value);
+      visit(value, acc);
     }
   },
 };
 
-function visit(node: Node | undefined) {
+function visit(node: Node | undefined, acc: Array<Node>) {
   if (!node?.type) {
     console.error('Node type is undefined');
     return;
   }
   const visit = visitFunctions[node.type];
-  visit(node);
+  visit(node, acc);
 }
 
 function sendDiagnostics(document: TextDocument, parseErrors: ParseError[]) {
