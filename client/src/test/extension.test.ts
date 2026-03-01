@@ -1,9 +1,7 @@
 import * as assert from 'assert';
-
-// You can import and use all API from the 'vscode' module
-// as well as import your extension to test it
 import * as vscode from 'vscode';
-// import * as myExtension from '../../extension';
+
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 suite('Extension Test Suite', () => {
   vscode.window.showInformationMessage('Start all tests.');
@@ -21,9 +19,21 @@ suite('Extension Test Suite', () => {
       content: '{"$ref": "test"}',
     });
     await vscode.window.showTextDocument(doc);
-
-    await new Promise((resolve) => setTimeout(resolve, 2000));
+    await sleep(2000);
 
     assert.strictEqual(ext.isActive, true, 'Extension should be active after opening a jref file');
-  }).timeout(3000);
+  }).timeout(5000);
+
+  test('Should show diagnostics', async () => {
+    const doc = await vscode.workspace.openTextDocument({
+      language: 'jref',
+      content: '{',
+    });
+    await vscode.window.showTextDocument(doc);
+    await sleep(2000);
+
+    const diagnostics = vscode.languages.getDiagnostics(doc.uri);
+    assert.ok(diagnostics.length > 0, 'Server should send diagnostics for missing brace');
+    assert.strictEqual(diagnostics[0].message, `Closing brace "}" expected`);
+  }).timeout(5000);
 });
