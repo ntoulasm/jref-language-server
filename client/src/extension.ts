@@ -37,7 +37,10 @@ export async function activate(context: ExtensionContext) {
   // Options to control the language client
   let clientOptions: LanguageClientOptions = {
     // Register the server for plain text documents
-    documentSelector: [{ scheme: 'file', language: 'jref' }],
+    documentSelector: [
+      { scheme: 'file', language: 'jref' },
+      { scheme: 'untitled', language: 'jref' },
+    ],
     synchronize: {
       // Notify the server about file changes to '.clientrc files contained in the workspace
       fileEvents: workspace.createFileSystemWatcher('**/.clientrc'),
