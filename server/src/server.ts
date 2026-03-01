@@ -16,6 +16,9 @@ import { TextDocument } from 'vscode-languageserver-textdocument';
 import { Node, ParseError, parseTree } from 'jsonc-parser';
 import { createParseErrorDiagnostic } from './diagnostics';
 
+import { onDefinition } from './definition';
+import { visit } from './visitor';
+
 // Create a connection for the server, using Node's IPC as a transport.
 // Also include all preview / proposed LSP features.
 let connection = createConnection(ProposedFeatures.all);
@@ -26,6 +29,8 @@ let documents: TextDocuments<TextDocument> = new TextDocuments(TextDocument);
 let hasConfigurationCapability: boolean = false;
 let hasWorkspaceFolderCapability: boolean = false;
 let hasDiagnosticRelatedInformationCapability: boolean = false;
+
+const documentRefs: WeakMap<TextDocument, Array<Node>> = new WeakMap();
 
 connection.onInitialize((params: InitializeParams) => {
   let capabilities = params.capabilities;
@@ -49,6 +54,7 @@ connection.onInitialize((params: InitializeParams) => {
       completionProvider: {
         resolveProvider: true,
       },
+      definitionProvider: true,
     },
   };
   if (hasWorkspaceFolderCapability) {
@@ -121,6 +127,9 @@ documents.onDidClose((e) => {
 documents.onDidChangeContent((change: TextDocumentChangeEvent<TextDocument>) => {
   const errors: ParseError[] = [];
   const ast: Node | undefined = parseTree(change.document.getText(), errors);
+  const references: Array<Node> = [];
+  visit(ast, references);
+  documentRefs.set(change.document, references);
   sendDiagnostics(change.document, errors);
 });
 
@@ -135,6 +144,8 @@ connection.onDidChangeWatchedFiles((_change) => {
   // Monitored files have change in VS Code
   connection.console.log('We received a file change event');
 });
+
+connection.onDefinition((params) => onDefinition(params, { documents, documentRefs }));
 
 // This handler provides the initial list of the completion items.
 connection.onCompletion((_textDocumentPosition: TextDocumentPositionParams): CompletionItem[] => {
