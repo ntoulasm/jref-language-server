@@ -9,12 +9,16 @@ import {
   TextDocumentSyncKind,
   InitializeResult,
   TextDocumentChangeEvent,
+  DefinitionParams,
+  DefinitionLink,
 } from 'vscode-languageserver/node';
 
 import { TextDocument } from 'vscode-languageserver-textdocument';
 
 import { Node, ParseError, parseTree } from 'jsonc-parser';
 import { createParseErrorDiagnostic } from './diagnostics';
+import path from 'path';
+import { URI } from 'vscode-uri';
 
 // Create a connection for the server, using Node's IPC as a transport.
 // Also include all preview / proposed LSP features.
@@ -51,6 +55,7 @@ connection.onInitialize((params: InitializeParams) => {
       completionProvider: {
         resolveProvider: true,
       },
+      definitionProvider: true,
     },
   };
   if (hasWorkspaceFolderCapability) {
@@ -182,6 +187,47 @@ connection.onDidChangeWatchedFiles((_change) => {
   // Monitored files have change in VS Code
   connection.console.log('We received a file change event');
 });
+
+connection.onDefinition((params: DefinitionParams): DefinitionLink[] | undefined => {
+  const document = documents.get(params.textDocument.uri);
+  if (!document) return;
+
+  const refs = documentRefs.get(document);
+  if (!refs || refs.length === 0) return;
+
+  const offset = document.offsetAt(params.position);
+  const targetRef = refs.find((ref) => {
+    const value = ref.children![1];
+    return offset >= value.offset && offset <= value.offset + value.length;
+  });
+  if (!targetRef) return;
+
+  return createDefinitionLink(document, targetRef);
+});
+
+function createDefinitionLink(document: TextDocument, ref: Node): DefinitionLink[] | undefined {
+  const refValueNode = ref.children![1];
+  const targetPath = refValueNode.value;
+  const currentDir = path.dirname(URI.parse(document.uri).fsPath);
+  const absolutePath = path.resolve(currentDir, targetPath);
+  return [
+    {
+      originSelectionRange: {
+        start: document.positionAt(refValueNode.offset + 1),
+        end: document.positionAt(refValueNode.offset + refValueNode.length - 1),
+      },
+      targetUri: URI.file(absolutePath).toString(),
+      targetRange: {
+        start: { line: 0, character: 0 },
+        end: { line: 0, character: 0 },
+      },
+      targetSelectionRange: {
+        start: { line: 0, character: 0 },
+        end: { line: 0, character: 0 },
+      },
+    },
+  ];
+}
 
 // This handler provides the initial list of the completion items.
 connection.onCompletion((_textDocumentPosition: TextDocumentPositionParams): CompletionItem[] => {

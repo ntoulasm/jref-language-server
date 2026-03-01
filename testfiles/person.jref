@@ -1,9 +1,5 @@
 {
   "name": "Jason",
-  "address": { "$ref": "address.jref" }
-  "test": [
-    {},
-    2,
-    ""
-  ]
+  "address": { "$ref": "address.jref" },
+  "addresses": [{ "$ref": "address.jref" }]
 }
