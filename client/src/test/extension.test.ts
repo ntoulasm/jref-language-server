@@ -8,8 +8,22 @@ import * as vscode from 'vscode';
 suite('Extension Test Suite', () => {
   vscode.window.showInformationMessage('Start all tests.');
 
-  test('Sample test', () => {
-    assert.strictEqual(-1, [1, 2, 3].indexOf(5));
-    assert.strictEqual(-1, [1, 2, 3].indexOf(0));
+  test('Extension should be present', () => {
+    assert.ok(vscode.extensions.getExtension('ntoulasm.jref-language-server-extension'));
   });
+
+  test('Should activate the extension when a .jref file is opened', async () => {
+    const ext = vscode.extensions.getExtension('ntoulasm.jref-language-server-extension');
+    assert.ok(ext, 'Extension not found in the registry');
+
+    const doc = await vscode.workspace.openTextDocument({
+      language: 'jref',
+      content: '{"$ref": "test"}',
+    });
+    await vscode.window.showTextDocument(doc);
+
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+
+    assert.strictEqual(ext.isActive, true, 'Extension should be active after opening a jref file');
+  }).timeout(3000);
 });
