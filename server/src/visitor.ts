@@ -41,5 +41,5 @@ export function visit(node: Node | undefined, acc: Array<Node>) {
     return;
   }
   const visit = visitFunctions[node.type];
-  visit(node, acc);
+  visit?.(node, acc);
 }
