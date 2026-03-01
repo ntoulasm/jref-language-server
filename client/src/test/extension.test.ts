@@ -82,4 +82,30 @@ suite('Extension Test Suite', () => {
     );
     assert.ok(fs.existsSync(link.targetUri.fsPath), 'The resolved target file must exist on disk');
   }).timeout(5000);
+
+  test('Should NOT provide a definition when clicking on irrelevant characters', async () => {
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'jref-test-'));
+    const targetFile = path.join(tmpDir, 'schema.jref');
+    const sourceFile = path.join(tmpDir, 'main.jref');
+
+    fs.writeFileSync(targetFile, '{"type": "string"}');
+    fs.writeFileSync(sourceFile, '{"$ref": "schema.jref"}');
+
+    const doc = await vscode.workspace.openTextDocument(sourceFile);
+    await vscode.window.showTextDocument(doc);
+
+    await sleep(2000);
+
+    // Line 0, Character 1 is at the "{"
+    const position = new vscode.Position(0, 1);
+
+    const locations = await vscode.commands.executeCommand<vscode.DefinitionLink[]>(
+      'vscode.executeDefinitionProvider',
+      doc.uri,
+      position,
+    );
+
+    const hasResults = locations && locations.length > 0;
+    assert.strictEqual(hasResults, false, 'Should not return a definition for non $ref keys');
+  }).timeout(5000);
 });
