@@ -4,6 +4,10 @@ import * as vscode from 'vscode';
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 suite('Extension Test Suite', () => {
+  teardown(async () => {
+    await vscode.commands.executeCommand('workbench.action.closeAllEditors');
+  });
+
   vscode.window.showInformationMessage('Start all tests.');
 
   test('Extension should be present', () => {
