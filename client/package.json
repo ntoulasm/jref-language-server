@@ -1,8 +1,26 @@
 {
-  "name": "client",
+  "name": "jref-language-server-extension",
+  "publisher": "ntoulasm",
+  "main": "./out/extension.js",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.109.0"
+  },
   "scripts": {
     "test": "vscode-test",
     "lint": "eslint src"
+  },
+  "contributes": {
+    "commands": [],
+    "languages": [
+      {
+        "id": "jref",
+        "extensions": [
+          ".jref"
+        ],
+        "configuration": "./language-configuration.json"
+      }
+    ]
   },
   "devDependencies": {
     "@types/mocha": "^10.0.10",
