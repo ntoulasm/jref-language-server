@@ -1,5 +1,15 @@
 {
   "name": "Jason",
   "address": { "$ref": "address.jref" },
-  "addresses": [{ "$ref": "address.jref" }]
+  "phones": [{ "$ref": "phone1.jref#/phone" }, { "$ref": "phone2.jref#/phone" }],
+  "title": {
+    "$ref": "directory.jref#/roles/engineering/1"
+  },
+  "workLocation": {
+    "siteName": { "$ref": "directory.jref#/offices/0/site" },
+    "emergencyContact": { "$ref": "directory.jref#/offices/0/support/landline" }
+  },
+  "directDial": {
+    "$ref": "directory.jref#/offices/0/support/voip"
+  }
 }
