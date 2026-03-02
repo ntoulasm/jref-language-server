@@ -83,4 +83,23 @@ suite('Visitor Test Suite', () => {
     visit(undefined, symbols);
     assert.strictEqual(symbols.size, 0);
   });
+
+  test('Should handle array elements', () => {
+    const text = '{"arr": ["a", "b", "c"]}';
+    const ast = parseTree(text);
+    const symbols: SymbolTable = new Map();
+    visit(ast, symbols);
+
+    assert.ok(symbols.has('/arr'), 'Should have a symbol for the array');
+    assert.strictEqual(symbols.get('/arr')?.node.type, 'array');
+
+    assert.ok(symbols.has('/arr/0'), 'Should have a symbol for the first element');
+    assert.strictEqual(symbols.get('/arr/0')?.node.type, 'string');
+
+    assert.ok(symbols.has('/arr/1'), 'Should have a symbol for the second element');
+    assert.strictEqual(symbols.get('/arr/1')?.node.type, 'string');
+
+    assert.ok(symbols.has('/arr/2'), 'Should have a symbol for the third element');
+    assert.strictEqual(symbols.get('/arr/2')?.node.type, 'string');
+  });
 });
