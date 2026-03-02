@@ -2,7 +2,7 @@ import { ParseError, ParseErrorCode } from 'jsonc-parser';
 import { Diagnostic, DiagnosticSeverity } from 'vscode-languageserver';
 import { TextDocument } from 'vscode-languageserver-textdocument';
 
-function getDiagnosticsMessage(code: ParseErrorCode): string {
+export function getDiagnosticsMessage(code: ParseErrorCode): string {
   switch (code) {
     case ParseErrorCode.InvalidSymbol:
       return 'Invalid symbol found';
