@@ -29,8 +29,7 @@ export function onDefinition(
   const refs = Array.from(symbols.values()).filter((symbol) => symbol.isReference);
   const offset = document.offsetAt(params.position);
   const targetRef = refs.find((ref) => {
-    const value = ref.node.children![1];
-    return offset >= value.offset && offset <= value.offset + value.length;
+    return offset >= ref.node.offset && offset <= ref.node.offset + ref.node.length;
   });
   if (!targetRef) return;
 
@@ -43,7 +42,7 @@ function createDefinitionLink(
   context: ServerContext,
 ): DefinitionLink[] | undefined {
   const { documents, documentSymbols } = context;
-  const refValueNode = ref.node.children![1];
+  const refValueNode = ref.node;
   const targetPath = refValueNode.value;
   const uri = URI.parse(targetPath);
   const currentDir = path.dirname(URI.parse(document.uri).fsPath);

@@ -15,46 +15,23 @@ const visitFunctions: Record<string, (node: Node, acc: SymbolTable, path: string
   property: visitProperty,
 };
 
-function isCompositeNode(node: Node): boolean {
-  return node.type === 'object' || node.type === 'array';
-}
-
 function visitObject(node: Node, acc: SymbolTable, path: string) {
-  const children = node?.children || [];
-  for (const child of children) {
+  node?.children?.forEach((child) => {
     visit(child, acc, path);
-  }
+  });
 }
 
 function visitArray(node: Node, acc: SymbolTable, path: string) {
-  const children = node?.children || [];
-  children.forEach((child, index) => {
+  node?.children?.forEach((child, index) => {
     visit(child, acc, path + '/' + index);
   });
 }
 
 function visitProperty(node: Node, acc: SymbolTable, path: string) {
-  const children = node?.children || [];
-  if (children.length !== 2) {
-    /* incomplete property */
-    return;
-  }
-  const key = children[0];
-  const value = children[1];
-  const pointer = path + '/' + key.value;
-  const isReference = key.type === 'string' && key.value === '$ref' && value.type === 'string';
-  const refersTo = isReference ? value.value : null;
-
-  acc.set(pointer, {
-    pointer,
-    node,
-    isReference,
-    refersTo,
-  });
-
-  if (isCompositeNode(value)) {
-    visit(value, acc, pointer);
-  }
+  if (node.children?.length !== 2) return;
+  const key = node.children[0].value;
+  const value = node.children[1];
+  visit(value, acc, `${path}/${key}`);
 }
 
 export function visit(node: Node | undefined, acc: SymbolTable, path: string = '') {
@@ -62,6 +39,27 @@ export function visit(node: Node | undefined, acc: SymbolTable, path: string = '
     console.error('Node type is undefined');
     return;
   }
+  const symbol = createJRefSymbol(node, path);
+  acc.set(path, symbol);
+
   const visit = visitFunctions[node.type];
   visit?.(node, acc, path);
+}
+
+function createJRefSymbol(node: Node, pointer: string): JRefSymbol {
+  const isReference = isReferenceValue(node);
+  return {
+    pointer,
+    node,
+    isReference,
+    refersTo: isReference ? node.value : null,
+  };
+}
+
+function isReferenceValue(node: Node): boolean {
+  return (
+    node.type === 'string' &&
+    node.parent?.type === 'property' &&
+    node.parent.children?.[0].value === '$ref'
+  );
 }
