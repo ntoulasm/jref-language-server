@@ -28,14 +28,14 @@ Syntax validation and error reporting for malformed JRef structure.
 1. Clone the repository
 
 ```bash
-   git clone https://github.com/ntoulasm/jref-language-server.git
-   cd jref-language-server
+git clone https://github.com/ntoulasm/jref-language-server.git
+cd jref-language-server
 ```
 
 2. Install dependencies
 
 ```bash
-   npm install
+npm install
 ```
 
 3. Open VS Code and press `F5` to open a new window with the extension loaded
@@ -53,9 +53,9 @@ These tests use `mocha` to test the server side functionality.
 ### How to run
 
 ```bash
-   npm run test -w client # client tests only
-   npm run test -w server # server tests only
-   npm run test           # both client and server tests
+npm run test -w client # client tests only
+npm run test -w server # server tests only
+npm run test           # both client and server tests
 ```
 
 ## Continuous Integration
