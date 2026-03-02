@@ -8,13 +8,13 @@ This project is a submission for the JSON Schema organization's Google Summer of
 
 Navigate to referenced files using `Ctrl+Click` on `$ref` values.
 
+![JRef Go to Definition Demo](images/definition.gif)
+
 ### Diagnostics
 
 Syntax validation and error reporting for malformed JRef structure.
 
-\!\[feature X\]\(images/feature-x.png\)
-
-> Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
+![JRef Diagnostics Demo](images/diagnostics.gif)
 
 ## Requirements
 
