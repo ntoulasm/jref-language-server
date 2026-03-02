@@ -1,7 +1,10 @@
 {
   "name": "server",
   "scripts": {
-    "lint": "eslint src"
+    "lint": "eslint src",
+    "compile": "tsc -b ../tsconfig.json",
+    "pretest": "npm run compile && npm run lint",
+    "test": "mocha --ui tdd \"out/test/**/*.test.js\""
   },
   "dependencies": {
     "jsonc-parser": "^3.3.1",
