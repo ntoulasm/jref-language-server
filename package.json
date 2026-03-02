@@ -31,7 +31,6 @@
     "vscode:prepublish": "npm run compile",
     "compile": "tsc -b ./",
     "watch": "tsc -b ./ -watch",
-    "pretest": "npm run compile && npm run lint",
     "lint": "npm run lint --workspaces",
     "format": "prettier --write .",
     "format:check": "prettier --check .",

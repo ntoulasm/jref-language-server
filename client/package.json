@@ -8,6 +8,8 @@
   },
   "scripts": {
     "test": "vscode-test",
+    "compile": "tsc -b ../tsconfig.json",
+    "pretest": "npm run compile && npm run lint",
     "lint": "eslint src"
   },
   "contributes": {
