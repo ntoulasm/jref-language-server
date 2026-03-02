@@ -1,71 +1,75 @@
-# jref-language-server README
+# JRef Language Support (VS Code Extension)
 
-This is the README for your extension "jref-language-server". After writing up a brief description, we recommend including the following sections.
+![CI Status](https://github.com/ntoulasm/jref-language-server/actions/workflows/ci.yml/badge.svg)
+
+This project is a submission for the JSON Schema organization's Google Summer of Code 2026 [qualification task](https://github.com/json-schema-org/community/issues/991#issuecomment-3961221291)
 
 ## Features
 
-Describe specific features of your extension including screenshots of your extension in action. Image paths are relative to this README file.
+### Go to Definition
 
-For example if there is an image subfolder under your extension project workspace:
+Navigate to referenced files using `Ctrl+Click` on `$ref` values.
 
-\!\[feature X\]\(images/feature-x.png\)
+![JRef Go to Definition Demo](images/definition.gif)
 
-> Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
+### Diagnostics
+
+Syntax validation and error reporting for malformed JRef structure.
+
+![JRef Diagnostics Demo](images/diagnostics.gif)
 
 ## Requirements
 
-If you have any requirements or dependencies, add a section describing those and how to install and configure them.
+1. Node
+2. VS Code
 
-## Extension Settings
+## How to run the extension
 
-Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
+1. Clone the repository
 
-For example:
+```bash
+git clone https://github.com/ntoulasm/jref-language-server.git
+cd jref-language-server
+```
 
-This extension contributes the following settings:
+2. Install dependencies
 
-- `myExtension.enable`: Enable/disable this extension.
-- `myExtension.thing`: Set to `blah` to do something.
+```bash
+npm install
+```
 
-## Known Issues
+3. Open VS Code and press `F5` to open a new window with the extension loaded
 
-Calling out known issues can help limit users opening duplicate issues against your extension.
+## Testing Suite
 
-## Release Notes
+### Integration Tests (`client/src/test`)
 
-Users appreciate release notes as you update your extension.
+These tests use `vscode-test` to simulate a real user environment.
 
-### 1.0.0
+### Unit Tests (`server/src/test`)
 
-Initial release of ...
+These tests use `mocha` to test the server side functionality.
 
-### 1.0.1
+### How to run
 
-Fixed issue #.
+```bash
+npm run test -w client # client tests only
+npm run test -w server # server tests only
+npm run test           # both client and server tests
+```
 
-### 1.1.0
+## Continuous Integration
 
-Added features X, Y, and Z.
+This repository uses **GitHub Actions** to ensure code quality on every push and PR.
 
----
+### Linting
 
-## Following extension guidelines
+Automated check for code style and formatting.
 
-Ensure that you've read through the extensions guidelines and follow the best practices for creating your extension.
+### Integration Tests
 
-- [Extension Guidelines](https://code.visualstudio.com/api/references/extension-guidelines)
+Executes the `vscode-test` suite for headless VS Code testing.
 
-## Working with Markdown
+### Unit Tests
 
-You can author your README using Visual Studio Code. Here are some useful editor keyboard shortcuts:
-
-- Split the editor (`Cmd+\` on macOS or `Ctrl+\` on Windows and Linux).
-- Toggle preview (`Shift+Cmd+V` on macOS or `Shift+Ctrl+V` on Windows and Linux).
-- Press `Ctrl+Space` (Windows, Linux, macOS) to see a list of Markdown snippets.
-
-## For more information
-
-- [Visual Studio Code's Markdown Support](http://code.visualstudio.com/docs/languages/markdown)
-- [Markdown Syntax Reference](https://help.github.com/articles/markdown-basics/)
-
-**Enjoy!**
+Runs the `mocha` suite for the Language Server logic.
