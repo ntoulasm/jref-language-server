@@ -2,8 +2,8 @@ import * as assert from 'assert';
 import { URI } from 'vscode-uri';
 import { TextDocument } from 'vscode-languageserver-textdocument';
 import { onDefinition } from '../definition.js';
-import { Node, parseTree } from 'jsonc-parser';
-import { visit } from '../visitor.js';
+import { parseTree } from 'jsonc-parser';
+import { SymbolTable, visit } from '../visitor.js';
 import { DefinitionParams } from 'vscode-languageserver/node';
 import path from 'path';
 
@@ -25,12 +25,12 @@ suite('Definition Test Suite', () => {
 
     const errors: any[] = [];
     const ast = parseTree(text, errors);
-    const refs: Node[] = [];
-    visit(ast, refs);
+    const symbols: SymbolTable = new Map();
+    visit(ast, symbols);
 
     const context = {
       documents: new MockTextDocuments([doc]) as any,
-      documentRefs: new WeakMap([[doc, refs]]),
+      documentSymbols: new WeakMap([[doc, symbols]]),
     };
 
     const params: DefinitionParams = {
@@ -52,12 +52,12 @@ suite('Definition Test Suite', () => {
 
     const errors: any[] = [];
     const ast = parseTree(text, errors);
-    const refs: Node[] = [];
-    visit(ast, refs);
+    const symbols: SymbolTable = new Map();
+    visit(ast, symbols);
 
     const context = {
       documents: new MockTextDocuments([doc]) as any,
-      documentRefs: new WeakMap([[doc, refs]]),
+      documentSymbols: new WeakMap([[doc, symbols]]),
     };
 
     const params: DefinitionParams = {
