@@ -1,5 +1,7 @@
 # JRef Language Support (VS Code Extension)
 
+![CI Status](https://github.com/ntoulasm/jref-language-server/actions/workflows/ci.yml/badge.svg)
+
 This project is a submission for the JSON Schema organization's Google Summer of Code 2026 [qualification task](https://github.com/json-schema-org/community/issues/991#issuecomment-3961221291)
 
 ## Features
