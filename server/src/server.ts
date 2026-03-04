@@ -6,9 +6,6 @@ import {
   TextDocumentSyncKind,
   InitializeResult,
   TextDocumentChangeEvent,
-  SemanticTokensBuilder,
-  SemanticTokens,
-  SemanticTokensParams,
 } from 'vscode-languageserver/node';
 
 import { TextDocument } from 'vscode-languageserver-textdocument';
@@ -18,6 +15,7 @@ import { createParseErrorDiagnostic } from './diagnostics';
 
 import { onDefinition } from './definition';
 import { SymbolTable, visit } from './visitor';
+import { handleSemanticTokens, tokenTypes } from './semanticTokens';
 
 // Create a connection for the server, using Node's IPC as a transport.
 // Also include all preview / proposed LSP features.
@@ -33,7 +31,7 @@ connection.onInitialize((params: InitializeParams) => {
       definitionProvider: true,
       semanticTokensProvider: {
         legend: {
-          tokenTypes: ['function'],
+          tokenTypes,
           tokenModifiers: [],
         },
         full: true,
@@ -63,31 +61,9 @@ function sendDiagnostics(document: TextDocument, parseErrors: ParseError[]) {
 
 connection.onDefinition((params) => onDefinition(params, { documents, documentSymbols }));
 
-connection.languages.semanticTokens.on((params: SemanticTokensParams): SemanticTokens => {
-  const document = documents.get(params.textDocument.uri);
-  if (!document) return { data: [] };
-  const tokensBuilder = new SemanticTokensBuilder();
-
-  const symbols = documentSymbols.get(document);
-  if (!symbols || symbols.size === 0) return { data: [] };
-
-  const refs = Array.from(symbols.values()).filter((symbol) => symbol.isReference);
-  for (const ref of refs) {
-    const valueNode = ref.node;
-    const valuePosition = document.positionAt(valueNode.offset);
-
-    // Highlight the value string
-    tokensBuilder.push(
-      valuePosition.line,
-      valuePosition.character,
-      valueNode.length,
-      0, // index of token type
-      0,
-    );
-  }
-
-  return tokensBuilder.build();
-});
+connection.languages.semanticTokens.on((params) =>
+  handleSemanticTokens(params, { documents, documentSymbols }),
+);
 
 // Make the text document manager listen on the connection
 // for open, change and close text document events
