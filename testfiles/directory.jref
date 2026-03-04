@@ -1,0 +1,22 @@
+{
+  "offices": [
+    {
+      "site": "Athens HQ",
+      "support": {
+        "landline": "+30-210-555-0199",
+        "voip": "ext-701"
+      }
+    },
+    {
+      "site": "London Branch",
+      "support": {
+        "landline": "+44-20-7946-0123",
+        "voip": "ext-202"
+      }
+    }
+  ],
+  "roles": {
+    "engineering": ["Junior Dev", "Senior Dev", "Lead"],
+    "management": ["PM", "Director"]
+  }
+}

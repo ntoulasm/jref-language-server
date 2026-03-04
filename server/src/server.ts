@@ -14,14 +14,14 @@ import { Node, ParseError, parseTree } from 'jsonc-parser';
 import { createParseErrorDiagnostic } from './diagnostics';
 
 import { onDefinition } from './definition';
-import { visit } from './visitor';
+import { JRefSymbol, SymbolTable, visit } from './visitor';
 
 // Create a connection for the server, using Node's IPC as a transport.
 // Also include all preview / proposed LSP features.
 let connection = createConnection(ProposedFeatures.all);
 // Create a simple text document manager.
 let documents: TextDocuments<TextDocument> = new TextDocuments(TextDocument);
-const documentRefs: WeakMap<TextDocument, Array<Node>> = new WeakMap();
+const documentSymbols: WeakMap<TextDocument, SymbolTable> = new WeakMap();
 
 connection.onInitialize((params: InitializeParams) => {
   const result: InitializeResult = {
@@ -38,9 +38,9 @@ connection.onInitialize((params: InitializeParams) => {
 documents.onDidChangeContent((change: TextDocumentChangeEvent<TextDocument>) => {
   const errors: ParseError[] = [];
   const ast: Node | undefined = parseTree(change.document.getText(), errors);
-  const references: Array<Node> = [];
-  visit(ast, references);
-  documentRefs.set(change.document, references);
+  const symbols: SymbolTable = new Map();
+  visit(ast, symbols);
+  documentSymbols.set(change.document, symbols);
   sendDiagnostics(change.document, errors);
 });
 
@@ -51,7 +51,7 @@ function sendDiagnostics(document: TextDocument, parseErrors: ParseError[]) {
   });
 }
 
-connection.onDefinition((params) => onDefinition(params, { documents, documentRefs }));
+connection.onDefinition((params) => onDefinition(params, { documents, documentSymbols }));
 
 // Make the text document manager listen on the connection
 // for open, change and close text document events
