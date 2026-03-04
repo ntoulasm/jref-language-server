@@ -1,7 +1,7 @@
 import * as assert from 'assert';
 import { ParseErrorCode, ParseError } from 'jsonc-parser';
 import { TextDocument } from 'vscode-languageserver-textdocument';
-import { createParseErrorDiagnostic, getDiagnosticsMessage } from '../diagnostics.js';
+import { createParseErrorDiagnostic, getDiagnosticsMessage } from '../providers/diagnostics.js';
 import { DiagnosticSeverity } from 'vscode-languageserver';
 
 suite('Diagnostics Test Suite', () => {

@@ -11,11 +11,11 @@ import {
 import { TextDocument } from 'vscode-languageserver-textdocument';
 
 import { Node, ParseError, parseTree } from 'jsonc-parser';
-import { createParseErrorDiagnostic } from './diagnostics';
+import { createParseErrorDiagnostic } from './providers/diagnostics';
 
-import { onDefinition } from './definition';
+import { onDefinition } from './providers/definition';
 import { SymbolTable, visit } from './visitor';
-import { handleSemanticTokens, tokenTypes } from './semanticTokens';
+import { handleSemanticTokens, tokenTypes } from './providers/semanticTokens';
 
 // Create a connection for the server, using Node's IPC as a transport.
 // Also include all preview / proposed LSP features.

@@ -3,7 +3,7 @@ import {
   SemanticTokens,
   SemanticTokensParams,
 } from 'vscode-languageserver/node';
-import { ServerContext } from './utils';
+import { ServerContext } from '../utils';
 
 export const tokenTypes = ['function'];
 
