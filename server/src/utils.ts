@@ -8,10 +8,15 @@ export interface ServerContext {
   documentSymbols: WeakMap<TextDocument, SymbolTable>;
 }
 
-export function extractSymbols(content: string): SymbolTable {
+export interface DocumentAnalysis {
+  symbols: SymbolTable;
+  errors: ParseError[];
+}
+
+export function analyze(content: string): DocumentAnalysis {
   const errors: ParseError[] = [];
   const ast = parseTree(content, errors);
   const symbols: SymbolTable = new Map();
   visit(ast, symbols);
-  return symbols;
+  return { symbols, errors };
 }

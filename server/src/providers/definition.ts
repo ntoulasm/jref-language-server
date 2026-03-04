@@ -4,7 +4,7 @@ import { URI } from 'vscode-uri';
 import { DefinitionParams, DefinitionLink, Range } from 'vscode-languageserver/node';
 import { TextDocument } from 'vscode-languageserver-textdocument';
 import { JRefSymbol } from '../visitor';
-import { extractSymbols, ServerContext } from '../utils';
+import { analyze, ServerContext } from '../utils';
 import * as fs from 'fs';
 
 const defaultTargetRange: Range = {
@@ -60,7 +60,7 @@ function createDefinitionLink(
     }
     let targetSymbolTable = documentSymbols.get(targetDocument);
     if (!targetSymbolTable) {
-      const symbols = extractSymbols(targetDocument.getText());
+      const { symbols } = analyze(targetDocument.getText());
       documentSymbols.set(targetDocument, symbols);
       targetSymbolTable = symbols;
     }
