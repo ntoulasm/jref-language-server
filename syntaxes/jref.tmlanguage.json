@@ -1,0 +1,9 @@
+{
+  "scopeName": "source.jref",
+  "injectionSelector": "L:source.json",
+  "patterns": [
+    {
+      "include": "source.json"
+    }
+  ]
+}

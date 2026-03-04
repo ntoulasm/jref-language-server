@@ -21,6 +21,13 @@
         ],
         "configuration": "./language-configuration.json"
       }
+    ],
+    "grammars": [
+      {
+        "language": "jref",
+        "scopeName": "source.jref",
+        "path": "./syntaxes/jref.tmLanguage.json"
+      }
     ]
   },
   "workspaces": [
