@@ -16,6 +16,7 @@ import { createParseErrorDiagnostic } from './providers/diagnostics';
 import { onDefinition } from './providers/definition';
 import { SymbolTable } from './symbolTable';
 import { handleSemanticTokens, tokenTypes } from './providers/semanticTokens';
+import { onDocumentSymbol } from './providers/documentSymbols';
 import { analyze } from './analyzer';
 
 // Create a connection for the server, using Node's IPC as a transport.
@@ -30,6 +31,7 @@ connection.onInitialize((params: InitializeParams) => {
     capabilities: {
       textDocumentSync: TextDocumentSyncKind.Incremental,
       definitionProvider: true,
+      documentSymbolProvider: true,
       semanticTokensProvider: {
         legend: {
           tokenTypes,
@@ -58,6 +60,8 @@ function sendDiagnostics(document: TextDocument, parseErrors: ParseError[]) {
 }
 
 connection.onDefinition((params) => onDefinition(params, { documents, documentSymbols }));
+
+connection.onDocumentSymbol((params) => onDocumentSymbol(params, { documents, documentSymbols }));
 
 connection.languages.semanticTokens.on((params) =>
   handleSemanticTokens(params, { documents, documentSymbols }),
