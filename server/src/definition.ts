@@ -1,14 +1,10 @@
 import path from 'path';
 import { URI } from 'vscode-uri';
 
-import { DefinitionParams, DefinitionLink, TextDocuments, Range } from 'vscode-languageserver/node';
+import { DefinitionParams, DefinitionLink, Range } from 'vscode-languageserver/node';
 import { TextDocument } from 'vscode-languageserver-textdocument';
-import { JRefSymbol, SymbolTable } from './visitor';
-
-interface ServerContext {
-  documents: TextDocuments<TextDocument>;
-  documentSymbols: WeakMap<TextDocument, SymbolTable>;
-}
+import { JRefSymbol } from './visitor';
+import { ServerContext } from './utils';
 
 const defaultTargetRange: Range = {
   start: { line: 0, character: 0 },

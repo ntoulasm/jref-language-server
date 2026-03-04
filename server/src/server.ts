@@ -14,7 +14,8 @@ import { Node, ParseError, parseTree } from 'jsonc-parser';
 import { createParseErrorDiagnostic } from './diagnostics';
 
 import { onDefinition } from './definition';
-import { JRefSymbol, SymbolTable, visit } from './visitor';
+import { SymbolTable, visit } from './visitor';
+import { handleSemanticTokens, tokenTypes } from './semanticTokens';
 
 // Create a connection for the server, using Node's IPC as a transport.
 // Also include all preview / proposed LSP features.
@@ -28,6 +29,13 @@ connection.onInitialize((params: InitializeParams) => {
     capabilities: {
       textDocumentSync: TextDocumentSyncKind.Incremental,
       definitionProvider: true,
+      semanticTokensProvider: {
+        legend: {
+          tokenTypes,
+          tokenModifiers: [],
+        },
+        full: true,
+      },
     },
   };
   return result;
@@ -52,6 +60,10 @@ function sendDiagnostics(document: TextDocument, parseErrors: ParseError[]) {
 }
 
 connection.onDefinition((params) => onDefinition(params, { documents, documentSymbols }));
+
+connection.languages.semanticTokens.on((params) =>
+  handleSemanticTokens(params, { documents, documentSymbols }),
+);
 
 // Make the text document manager listen on the connection
 // for open, change and close text document events
