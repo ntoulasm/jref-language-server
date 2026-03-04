@@ -1,6 +1,6 @@
 import { Node, parseTree, ParseError } from 'jsonc-parser';
 import { SymbolTable, JRefSymbol } from './symbolTable';
-import { visit } from './visitor';
+import { visit, VisitCallback } from './visitor';
 
 export interface DocumentAnalysis {
   symbols: SymbolTable;
@@ -11,7 +11,12 @@ export function analyze(content: string): DocumentAnalysis {
   const errors: ParseError[] = [];
   const ast = parseTree(content, errors);
   const symbols: SymbolTable = new Map();
-  visit(ast, symbols);
+
+  visit(ast, (node, path) => {
+    const symbol = createJRefSymbol(node, path);
+    symbols.set(path, symbol);
+  });
+
   return { symbols, errors };
 }
 
