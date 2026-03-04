@@ -15,7 +15,7 @@ suite('Extension Test Suite', () => {
 
   test('Extension should be present', () => {
     assert.ok(vscode.extensions.getExtension('ntoulasm.jref-language-server-extension'));
-  });
+  }).timeout(5000);
 
   test('Should activate the extension when a .jref file is opened', async () => {
     const ext = vscode.extensions.getExtension('ntoulasm.jref-language-server-extension');
@@ -108,4 +108,56 @@ suite('Extension Test Suite', () => {
     const hasResults = locations && locations.length > 0;
     assert.strictEqual(hasResults, false, 'Should not return a definition for non $ref keys');
   }).timeout(5000);
+
+  test('Should provide a definition for $ref values with fragments', async () => {
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'jref-test-fragment-'));
+    const targetFile = path.join(tmpDir, 'schema.jref');
+    const sourceFile = path.join(tmpDir, 'main.jref');
+
+    const schemaContent = '{"definitions": {"target": {}}}';
+    fs.writeFileSync(targetFile, schemaContent);
+    fs.writeFileSync(sourceFile, '{"$ref": "schema.jref#/definitions/target"}');
+
+    // Open the target schema document first so the server indexes it
+    const schemaDoc = await vscode.workspace.openTextDocument(targetFile);
+    await vscode.window.showTextDocument(schemaDoc);
+
+    const doc = await vscode.workspace.openTextDocument(sourceFile);
+    await vscode.window.showTextDocument(doc);
+
+    await sleep(2000);
+
+    // Character 12 is inside "schema.jref#/definitions/target"
+    const position = new vscode.Position(0, 12);
+
+    const locations = await vscode.commands.executeCommand<vscode.LocationLink[]>(
+      'vscode.executeDefinitionProvider',
+      doc.uri,
+      position,
+    );
+
+    assert.ok(
+      locations && Array.isArray(locations) && locations.length > 0,
+      'Should return an array of LocationLinks',
+    );
+
+    const link = locations[0];
+    const resolvedPath = link.targetUri.fsPath.toLowerCase();
+    const expectedPath = targetFile.toLowerCase();
+
+    assert.strictEqual(
+      resolvedPath,
+      expectedPath,
+      `Expected to point to ${expectedPath} but got ${resolvedPath}`,
+    );
+
+    // The target range should point to the value of "target" property in schema.jref
+    // {"definitions": {"target": {}}}
+    //                            ^--- {} starts at character 27
+    assert.strictEqual(
+      link.targetRange.start.character,
+      27,
+      `Expected target character 27, but got ${link.targetRange.start.character}`,
+    );
+  }).timeout(10000);
 });
