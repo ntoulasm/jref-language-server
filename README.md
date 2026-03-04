@@ -22,6 +22,11 @@ Syntax validation and error reporting for malformed JRef structure.
 
 The Language Server understands the JRef schema. It surgically identifies `$ref` keys and their destination paths to provide a clear visual distinction.
 
+### Document Symbols
+
+The Language Server implements a Document Symbol Provider that enables the Outline View, Breadcrumbs and Symbol Search
+![Jref Document Symbols](images/documentSymbols.png)
+
 ## Requirements
 
 1. Node
