@@ -2,7 +2,6 @@ import { Node } from 'jsonc-parser';
 
 
 
-export type SymbolTable = Map<string, JRefSymbol>;
 
 const visitFunctions: Record<string, (node: Node, acc: SymbolTable, path: string) => void> = {
   object: visitObject,

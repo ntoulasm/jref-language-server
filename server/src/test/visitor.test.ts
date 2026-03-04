@@ -1,14 +1,10 @@
 import * as assert from 'assert';
-import { parseTree } from 'jsonc-parser';
-import { visit } from  '../visitor.js';
-import { SymbolTable } from '../symbolTable.js';
+import { analyze } from '../analyzer.js';
 
 suite('Visitor Test Suite', () => {
   test('Should find a single $ref in a simple object', () => {
     const text = '{"$ref": "path/to/schema.json"}';
-    const ast = parseTree(text);
-    const symbols: SymbolTable = new Map();
-    visit(ast, symbols);
+    const { symbols } = analyze(text);
 
     assert.strictEqual(symbols.get('/$ref')?.node.type, 'string');
     assert.strictEqual(symbols.get('/$ref')?.isReference, true);
@@ -20,9 +16,7 @@ suite('Visitor Test Suite', () => {
             "first": { "$ref": "one.json" },
             "second": { "inner": { "$ref": "two.json" } }
         }`;
-    const ast = parseTree(text);
-    const symbols: SymbolTable = new Map();
-    visit(ast, symbols);
+    const { symbols } = analyze(text);
 
     assert.strictEqual(symbols.get('/first/$ref')?.node.type, 'string');
     assert.strictEqual(symbols.get('/first/$ref')?.isReference, true);
@@ -39,9 +33,7 @@ suite('Visitor Test Suite', () => {
             { "other": "value" },
             { "$ref": "item2.json" }
         ]`;
-    const ast = parseTree(text);
-    const symbols: SymbolTable = new Map();
-    visit(ast, symbols);
+    const { symbols } = analyze(text);
 
     assert.strictEqual(symbols.get('/0/$ref')?.node.type, 'string');
     assert.strictEqual(symbols.get('/0/$ref')?.isReference, true);
@@ -58,9 +50,7 @@ suite('Visitor Test Suite', () => {
 
   test('Should NOT pick up $ref if the value is not a string', () => {
     const text = '{"$ref": 123}';
-    const ast = parseTree(text);
-    const symbols: SymbolTable = new Map();
-    visit(ast, symbols);
+    const { symbols } = analyze(text);
 
     assert.strictEqual(symbols.get('/$ref')?.isReference, false);
     assert.strictEqual(symbols.get('/$ref')?.refersTo, null);
@@ -68,9 +58,7 @@ suite('Visitor Test Suite', () => {
 
   test('Should handle empty objects and arrays', () => {
     const text = '{"obj": {}, "arr": []}';
-    const ast = parseTree(text);
-    const symbols: SymbolTable = new Map();
-    visit(ast, symbols);
+    const { symbols } = analyze(text);
 
     assert.ok(symbols.has('/obj'), 'Should have a symbol for the empty object');
     assert.strictEqual(symbols.get('/obj')?.node.type, 'object');
@@ -80,16 +68,13 @@ suite('Visitor Test Suite', () => {
   });
 
   test('Should handle undefined or null nodes gracefully', () => {
-    const symbols: SymbolTable = new Map();
-    visit(undefined, symbols);
+    const { symbols } = analyze('');
     assert.strictEqual(symbols.size, 0);
   });
 
   test('Should handle array elements', () => {
     const text = '{"arr": ["a", "b", "c"]}';
-    const ast = parseTree(text);
-    const symbols: SymbolTable = new Map();
-    visit(ast, symbols);
+    const { symbols } = analyze(text);
 
     assert.ok(symbols.has('/arr'), 'Should have a symbol for the array');
     assert.strictEqual(symbols.get('/arr')?.node.type, 'array');
