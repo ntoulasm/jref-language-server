@@ -1,7 +1,7 @@
 import * as assert from 'assert';
 import { analyze } from '../analyzer.js';
 
-suite('Visitor Test Suite', () => {
+suite('Analyzer Test Suite', () => {
   test('Should find a single $ref in a simple object', () => {
     const text = '{"$ref": "path/to/schema.json"}';
     const { symbols } = analyze(text);
