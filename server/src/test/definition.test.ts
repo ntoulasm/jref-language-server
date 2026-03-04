@@ -2,8 +2,7 @@ import * as assert from 'assert';
 import { URI } from 'vscode-uri';
 import { TextDocument } from 'vscode-languageserver-textdocument';
 import { onDefinition } from '../providers/definition.js';
-import { parseTree } from 'jsonc-parser';
-import { SymbolTable, visit } from '../visitor.js';
+import { analyze } from '../analyzer.js';
 import { DefinitionParams } from 'vscode-languageserver/node';
 import path from 'path';
 
@@ -23,10 +22,7 @@ suite('Definition Test Suite', () => {
     const uri = URI.file(path.resolve('/abs/path/main.jref')).toString();
     const doc = TextDocument.create(uri, 'jref', 1, text);
 
-    const errors: any[] = [];
-    const ast = parseTree(text, errors);
-    const symbols: SymbolTable = new Map();
-    visit(ast, symbols);
+    const { symbols } = analyze(text);
 
     const context = {
       documents: new MockTextDocuments([doc]) as any,
@@ -50,10 +46,7 @@ suite('Definition Test Suite', () => {
     const uri = URI.file(path.resolve('/abs/path/main.jref')).toString();
     const doc = TextDocument.create(uri, 'jref', 1, text);
 
-    const errors: any[] = [];
-    const ast = parseTree(text, errors);
-    const symbols: SymbolTable = new Map();
-    visit(ast, symbols);
+    const { symbols } = analyze(text);
 
     const context = {
       documents: new MockTextDocuments([doc]) as any,
@@ -78,13 +71,9 @@ suite('Definition Test Suite', () => {
     const schemaUri = URI.file(path.resolve('/abs/path/schema.jref')).toString();
     const schemaDoc = TextDocument.create(schemaUri, 'jref', 1, schemaText);
 
-    const mainAst = parseTree(mainText);
-    const mainSymbols: SymbolTable = new Map();
-    visit(mainAst, mainSymbols);
+    const { symbols: mainSymbols } = analyze(mainText);
 
-    const schemaAst = parseTree(schemaText);
-    const schemaSymbols: SymbolTable = new Map();
-    visit(schemaAst, schemaSymbols);
+    const { symbols: schemaSymbols } = analyze(schemaText);
 
     const context = {
       documents: new MockTextDocuments([mainDoc, schemaDoc]) as any,

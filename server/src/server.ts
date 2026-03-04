@@ -14,9 +14,9 @@ import { ParseError } from 'jsonc-parser';
 import { createParseErrorDiagnostic } from './providers/diagnostics';
 
 import { onDefinition } from './providers/definition';
-import { SymbolTable } from './visitor';
+import { SymbolTable } from './symbolTable';
 import { handleSemanticTokens, tokenTypes } from './providers/semanticTokens';
-import { analyze } from './utils';
+import { analyze } from './analyzer';
 
 // Create a connection for the server, using Node's IPC as a transport.
 // Also include all preview / proposed LSP features.
