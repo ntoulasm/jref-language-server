@@ -1,6 +1,7 @@
 import * as assert from 'assert';
 import { parseTree } from 'jsonc-parser';
-import { SymbolTable, visit } from '../visitor.js';
+import { visit } from  '../visitor.js';
+import { SymbolTable } from '../symbolTable.js';
 
 suite('Visitor Test Suite', () => {
   test('Should find a single $ref in a simple object', () => {

@@ -1,5 +1,6 @@
 import { TextDocuments } from 'vscode-languageserver/node';
-import { SymbolTable, visit } from './visitor';
+import { visit } from './visitor';
+import { SymbolTable } from './symbolTable';
 import { TextDocument } from 'vscode-languageserver-textdocument';
 import { ParseError, parseTree } from 'jsonc-parser';
 

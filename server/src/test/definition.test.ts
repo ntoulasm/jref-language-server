@@ -3,7 +3,8 @@ import { URI } from 'vscode-uri';
 import { TextDocument } from 'vscode-languageserver-textdocument';
 import { onDefinition } from '../providers/definition.js';
 import { parseTree } from 'jsonc-parser';
-import { SymbolTable, visit } from '../visitor.js';
+import { visit } from '../visitor.js';
+import { SymbolTable } from '../symbolTable.js';
 import { DefinitionParams } from 'vscode-languageserver/node';
 import path from 'path';
 

@@ -14,7 +14,7 @@ import { ParseError } from 'jsonc-parser';
 import { createParseErrorDiagnostic } from './providers/diagnostics';
 
 import { onDefinition } from './providers/definition';
-import { SymbolTable } from './visitor';
+import { SymbolTable } from './symbolTable';
 import { handleSemanticTokens, tokenTypes } from './providers/semanticTokens';
 import { analyze } from './utils';
 

@@ -4,8 +4,8 @@ import * as fs from 'fs';
 
 import { DefinitionParams, DefinitionLink, Range } from 'vscode-languageserver/node';
 import { TextDocument } from 'vscode-languageserver-textdocument';
-import { JRefSymbol, SymbolTable } from '../visitor';
 import { analyze, ServerContext } from '../utils';
+import { JRefSymbol, SymbolTable } from '../symbolTable';
 
 const defaultTargetRange: Range = {
   start: { line: 0, character: 0 },
