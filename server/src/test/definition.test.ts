@@ -1,7 +1,7 @@
 import * as assert from 'assert';
 import { URI } from 'vscode-uri';
 import { TextDocument } from 'vscode-languageserver-textdocument';
-import { onDefinition } from '../definition.js';
+import { onDefinition } from '../providers/definition.js';
 import { parseTree } from 'jsonc-parser';
 import { SymbolTable, visit } from '../visitor.js';
 import { DefinitionParams } from 'vscode-languageserver/node';

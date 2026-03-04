@@ -3,8 +3,8 @@ import { URI } from 'vscode-uri';
 
 import { DefinitionParams, DefinitionLink, Range } from 'vscode-languageserver/node';
 import { TextDocument } from 'vscode-languageserver-textdocument';
-import { JRefSymbol } from './visitor';
-import { ServerContext } from './utils';
+import { JRefSymbol } from '../visitor';
+import { ServerContext } from '../utils';
 
 const defaultTargetRange: Range = {
   start: { line: 0, character: 0 },
