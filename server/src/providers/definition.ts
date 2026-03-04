@@ -1,11 +1,11 @@
 import path from 'path';
 import { URI } from 'vscode-uri';
+import * as fs from 'fs';
 
 import { DefinitionParams, DefinitionLink, Range } from 'vscode-languageserver/node';
 import { TextDocument } from 'vscode-languageserver-textdocument';
-import { JRefSymbol } from '../visitor';
+import { JRefSymbol, SymbolTable } from '../visitor';
 import { analyze, ServerContext } from '../utils';
-import * as fs from 'fs';
 
 const defaultTargetRange: Range = {
   start: { line: 0, character: 0 },
@@ -37,50 +37,72 @@ function createDefinitionLink(
   document: TextDocument,
   ref: JRefSymbol,
   context: ServerContext,
-): DefinitionLink[] | undefined {
-  const { documents, documentSymbols } = context;
-  const refValueNode = ref.node;
-  const targetPath = refValueNode.value;
-  const uri = URI.parse(targetPath);
-  const currentDir = path.dirname(URI.parse(document.uri).fsPath);
-  const absolutePath = path.resolve(currentDir, uri.path.slice(1));
-  const targetUri = URI.file(absolutePath).toString();
-  const targetRange = getTargetRange(targetUri);
+): DefinitionLink[] {
+  const { targetUri, fragment } = resolveTargetUriAndFragment(document.uri, ref.node.value);
 
-  function getTargetRange(targetUri: string): Range {
-    let targetDocument = documents.get(targetUri);
-    if (!targetDocument) {
-      try {
-        const filePath = URI.parse(targetUri).fsPath;
-        const content = fs.readFileSync(filePath, 'utf8');
-        targetDocument = TextDocument.create(targetUri, 'jref', 1, content);
-      } catch (e) {
-        return defaultTargetRange;
-      }
-    }
-    let targetSymbolTable = documentSymbols.get(targetDocument);
-    if (!targetSymbolTable) {
-      const { symbols } = analyze(targetDocument.getText());
-      documentSymbols.set(targetDocument, symbols);
-      targetSymbolTable = symbols;
-    }
-    const targetSymbol = targetSymbolTable?.get(uri.fragment);
-    if (!targetSymbol) return defaultTargetRange;
-    return {
-      start: targetDocument.positionAt(targetSymbol.node.offset),
-      end: targetDocument.positionAt(targetSymbol.node.offset + targetSymbol.node.length),
-    };
-  }
+  const targetRange = findTargetRange(targetUri, fragment, context);
 
   return [
     {
-      originSelectionRange: {
-        start: document.positionAt(refValueNode.offset + 1), // +1 to skip the opening quote
-        end: document.positionAt(refValueNode.offset + refValueNode.length - 1), // -1 to skip the closing quote
-      },
-      targetUri: URI.file(absolutePath).toString(),
-      targetRange: targetRange,
+      originSelectionRange: createOriginSelectionRange(document, ref),
+      targetUri,
+      targetRange,
       targetSelectionRange: targetRange,
     },
   ];
+}
+
+function resolveTargetUriAndFragment(documentUri: string, targetPath: string) {
+  const uri = URI.parse(targetPath);
+  const currentDir = path.dirname(URI.parse(documentUri).fsPath);
+  const absolutePath = path.resolve(currentDir, uri.path.slice(1));
+  const targetUri = URI.file(absolutePath).toString();
+  return { targetUri, fragment: uri.fragment };
+}
+
+function getOrLoadDocument(targetUri: string, context: ServerContext): TextDocument | undefined {
+  const { documents } = context;
+  const targetDocument = documents.get(targetUri);
+  if (targetDocument) return targetDocument;
+
+  try {
+    const filePath = URI.parse(targetUri).fsPath;
+    const content = fs.readFileSync(filePath, 'utf8');
+    return TextDocument.create(targetUri, 'jref', 1, content);
+  } catch (e) {
+    return;
+  }
+}
+
+function getOrAnalyzeSymbols(targetDocument: TextDocument, context: ServerContext): SymbolTable {
+  const { documentSymbols } = context;
+  let targetSymbolTable = documentSymbols.get(targetDocument);
+  if (targetSymbolTable) return targetSymbolTable;
+
+  const { symbols } = analyze(targetDocument.getText());
+  documentSymbols.set(targetDocument, symbols);
+  return symbols;
+}
+
+function findTargetRange(targetUri: string, fragment: string, context: ServerContext): Range {
+  const targetDocument = getOrLoadDocument(targetUri, context);
+  if (!targetDocument) return defaultTargetRange;
+
+  const targetSymbolTable = getOrAnalyzeSymbols(targetDocument, context);
+  const targetSymbol = targetSymbolTable.get(fragment || ''); // Default to empty string if no fragment
+
+  if (!targetSymbol) return defaultTargetRange;
+
+  return {
+    start: targetDocument.positionAt(targetSymbol.node.offset),
+    end: targetDocument.positionAt(targetSymbol.node.offset + targetSymbol.node.length),
+  };
+}
+
+function createOriginSelectionRange(document: TextDocument, ref: JRefSymbol): Range {
+  const refValueNode = ref.node;
+  return {
+    start: document.positionAt(refValueNode.offset + 1), // +1 to skip the opening quote
+    end: document.positionAt(refValueNode.offset + refValueNode.length - 1), // -1 to skip the closing quote
+  };
 }
