@@ -10,12 +10,13 @@ import {
 
 import { TextDocument } from 'vscode-languageserver-textdocument';
 
-import { Node, ParseError, parseTree } from 'jsonc-parser';
+import { ParseError } from 'jsonc-parser';
 import { createParseErrorDiagnostic } from './providers/diagnostics';
 
 import { onDefinition } from './providers/definition';
-import { SymbolTable, visit } from './visitor';
+import { SymbolTable } from './visitor';
 import { handleSemanticTokens, tokenTypes } from './providers/semanticTokens';
+import { analyze } from './utils';
 
 // Create a connection for the server, using Node's IPC as a transport.
 // Also include all preview / proposed LSP features.
@@ -44,10 +45,7 @@ connection.onInitialize((params: InitializeParams) => {
 // The content of a text document has changed. This event is emitted
 // when the text document first opened or when its content has changed.
 documents.onDidChangeContent((change: TextDocumentChangeEvent<TextDocument>) => {
-  const errors: ParseError[] = [];
-  const ast: Node | undefined = parseTree(change.document.getText(), errors);
-  const symbols: SymbolTable = new Map();
-  visit(ast, symbols);
+  const { symbols, errors } = analyze(change.document.getText());
   documentSymbols.set(change.document, symbols);
   sendDiagnostics(change.document, errors);
 });

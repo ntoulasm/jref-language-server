@@ -4,7 +4,8 @@ import { URI } from 'vscode-uri';
 import { DefinitionParams, DefinitionLink, Range } from 'vscode-languageserver/node';
 import { TextDocument } from 'vscode-languageserver-textdocument';
 import { JRefSymbol } from '../visitor';
-import { ServerContext } from '../utils';
+import { analyze, ServerContext } from '../utils';
+import * as fs from 'fs';
 
 const defaultTargetRange: Range = {
   start: { line: 0, character: 0 },
@@ -43,13 +44,26 @@ function createDefinitionLink(
   const uri = URI.parse(targetPath);
   const currentDir = path.dirname(URI.parse(document.uri).fsPath);
   const absolutePath = path.resolve(currentDir, uri.path.slice(1));
-  const targetDocument = documents.get(URI.file(absolutePath).toString());
-  const targetRange = getTargetRange(targetDocument);
+  const targetUri = URI.file(absolutePath).toString();
+  const targetRange = getTargetRange(targetUri);
 
-  function getTargetRange(targetDocument: TextDocument | undefined): Range {
-    if (!targetDocument) return defaultTargetRange;
-    const targetSymbolTable = documentSymbols.get(targetDocument);
-    if (!targetSymbolTable) return defaultTargetRange;
+  function getTargetRange(targetUri: string): Range {
+    let targetDocument = documents.get(targetUri);
+    if (!targetDocument) {
+      try {
+        const filePath = URI.parse(targetUri).fsPath;
+        const content = fs.readFileSync(filePath, 'utf8');
+        targetDocument = TextDocument.create(targetUri, 'jref', 1, content);
+      } catch (e) {
+        return defaultTargetRange;
+      }
+    }
+    let targetSymbolTable = documentSymbols.get(targetDocument);
+    if (!targetSymbolTable) {
+      const { symbols } = analyze(targetDocument.getText());
+      documentSymbols.set(targetDocument, symbols);
+      targetSymbolTable = symbols;
+    }
     const targetSymbol = targetSymbolTable?.get(uri.fragment);
     if (!targetSymbol) return defaultTargetRange;
     return {
