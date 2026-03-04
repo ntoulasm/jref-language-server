@@ -25,7 +25,7 @@
 			"address": "localhost",
 			"restart": true,
 			"outFiles": [
-				"${workspaceFolder}/server/out/*.js"
+				"${workspaceFolder}/server/out/**/*.js"
 			]
 		}
 	],
