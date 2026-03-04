@@ -5,7 +5,7 @@ import * as fs from 'fs';
 import { DefinitionParams, DefinitionLink, Range } from 'vscode-languageserver/node';
 import { TextDocument } from 'vscode-languageserver-textdocument';
 import { JRefSymbol, SymbolTable } from '../symbolTable';
-import { ServerContext } from '../utils';
+import { ServerContext, createRange } from '../utils';
 import { analyze } from '../analyzer';
 
 const defaultTargetRange: Range = {
@@ -93,11 +93,7 @@ function findTargetRange(targetUri: string, fragment: string, context: ServerCon
   const targetSymbol = targetSymbolTable.get(fragment || ''); // Default to empty string if no fragment
 
   if (!targetSymbol) return defaultTargetRange;
-
-  return {
-    start: targetDocument.positionAt(targetSymbol.node.offset),
-    end: targetDocument.positionAt(targetSymbol.node.offset + targetSymbol.node.length),
-  };
+  return createRange(targetDocument, targetSymbol.node);
 }
 
 function createOriginSelectionRange(document: TextDocument, ref: JRefSymbol): Range {
