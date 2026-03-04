@@ -18,6 +18,10 @@ Syntax validation and error reporting for malformed JRef structure.
 
 ![JRef Diagnostics Demo](images/diagnostics.gif)
 
+### Semantic Syntax Highlighting
+
+The Language Server understands the JRef schema. It surgically identifies `$ref` keys and their destination paths to provide a clear visual distinction.
+
 ## Requirements
 
 1. Node
