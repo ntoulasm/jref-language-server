@@ -1,7 +1,5 @@
 import { Node } from 'jsonc-parser';
-
-
-
+import { SymbolTable, JRefSymbol } from './symbolTable';
 
 const visitFunctions: Record<string, (node: Node, acc: SymbolTable, path: string) => void> = {
   object: visitObject,
