@@ -123,7 +123,7 @@ suite('Definition Test Suite', () => {
     assert.ok(link.targetUri.endsWith('local.jref'));
     // Target range should point to the "a" property value in schema.jref
     // {"foo": { "$ref": "#/a" }, "a": 42}
-    //                                 ^--- value 42 is at character 33
-    assert.strictEqual(link.targetRange.start.character, 33);
+    //                                 ^--- value 42 is at character 32
+    assert.strictEqual(link.targetRange.start.character, 32);
   });
 });
