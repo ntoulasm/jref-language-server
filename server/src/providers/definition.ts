@@ -53,7 +53,14 @@ function createDefinitionLink(
   ];
 }
 
+function isLocalReference(targetPath: string): boolean {
+  return targetPath.startsWith('#');
+}
+
 function resolveTargetUriAndFragment(documentUri: string, targetPath: string) {
+  if (isLocalReference(targetPath)) {
+    return { targetUri: documentUri, fragment: targetPath.slice(1) };
+  }
   const uri = URI.parse(targetPath);
   const currentDir = path.dirname(URI.parse(documentUri).fsPath);
   const absolutePath = path.resolve(currentDir, uri.path.slice(1));

@@ -98,4 +98,32 @@ suite('Definition Test Suite', () => {
     //                            ^--- value {} is at character 27
     assert.strictEqual(link.targetRange.start.character, 27);
   });
+
+  test('Should return a definition for local $ref', () => {
+    const text = '{"foo": { "$ref": "#/a" }, "a": 42}';
+    const uri = URI.file(path.resolve('/abs/path/local.jref')).toString();
+    const doc = TextDocument.create(uri, 'jref', 1, text);
+
+    const { symbols } = analyze(text);
+
+    const context = {
+      documents: new MockTextDocuments([doc]) as any,
+      documentSymbols: new WeakMap([[doc, symbols]]),
+    };
+
+    const params: DefinitionParams = {
+      textDocument: { uri: uri },
+      position: { line: 0, character: 19 }, // Inside "#/a"
+    };
+
+    const result = onDefinition(params, context);
+
+    assert.ok(result && result.length > 0);
+    const link = result![0];
+    assert.ok(link.targetUri.endsWith('local.jref'));
+    // Target range should point to the "a" property value in schema.jref
+    // {"foo": { "$ref": "#/a" }, "a": 42}
+    //                                 ^--- value 42 is at character 32
+    assert.strictEqual(link.targetRange.start.character, 32);
+  });
 });
